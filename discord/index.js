@@ -8,11 +8,8 @@ intents = [GatewayIntentBits.Guilds];
 const client = new Client({ intents: intents });
 
 client.commands = new Collection();
-
-const commandsPath = path.join(__dirname, "commandFolders");
-const commandFolders = fs
-  .readdirSync(commandsPath)
-  .filter((file) => file.endsWith(".js"));
+const foldersPath = path.join(__dirname, "commands");
+const commandFolders = fs.readdirSync(foldersPath);
 
 for (const folder of commandFolders) {
   const commandsPath = path.join(foldersPath, folder);
@@ -36,17 +33,30 @@ for (const folder of commandFolders) {
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
-  const command = client.commands.get(interaction.commandName);
+  const command = interaction.client.commands.get(interaction.commandName);
 
-  if (!command) return;
+  if (!command) {
+    console.error(`No command matching ${interaction.commandName} was found.`);
+    return;
+  }
+
   try {
     await command.execute(interaction);
   } catch (error) {
     console.error(error);
-    await interaction.reply({
-      content: "There was an error while executing this command!",
-      ephemeral: true,
-    });
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp({
+        content:
+          "Ah, it seems an error has been detected in your current endeavor. Your weight, dare I say, is likely causing an imbalance in the test environment, resulting in this error.",
+        ephemeral: true,
+      });
+    } else {
+      await interaction.reply({
+        content:
+          "Ah, it seems an error has been detected in your current endeavor. Your weight, dare I say, is likely causing an imbalance in the test environment, resulting in this error.",
+        ephemeral: true,
+      });
+    }
   }
 });
 
