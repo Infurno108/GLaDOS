@@ -1,2 +1,4 @@
 discord/config.json
 discord/commandFolders/chat/config.json
+discord/commands/chat/config.json
+discord/commands/help/config.json
